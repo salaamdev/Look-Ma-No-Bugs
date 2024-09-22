@@ -1,3 +1,6 @@
+#folder, files related ignores
+error_log.txt
+
 # Logs
 logs
 *.log
