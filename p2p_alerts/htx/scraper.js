@@ -3,10 +3,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
 const path = require('path');
 
-// Configure StealthPlugin
-const stealthPlugin = StealthPlugin();
-stealthPlugin.enabledEvasions.delete('user-agent-override');
-puppeteer.use(stealthPlugin);
+puppeteer.use(StealthPlugin());  // Use stealth plugin to prevent detection
 
 // Function to introduce a delay
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -41,23 +38,23 @@ const logError = (error) => {
     });
 };
 
-// Function to scrape P2P data with exponential backoff retries
-const scrapeP2P = async (page, retries = 5, delay = 60000) => {
+// Function to scrape P2P data with retries
+const scrapeP2P = async (page, retries = 10) => {
     console.log('Starting scraper...');
 
     try {
-        console.log('Navigating to page...');
+        // Navigate to the HTX P2P USDT-KES page
         await page.goto('https://www.htx.com/en-us/fiat-crypto/trade/buy-usdt-kes/', {
-            waitUntil: 'networkidle0',
-            timeout: 600000  // Set timeout to 10 minutes
+            waitUntil: 'domcontentloaded',
+            timeout: 600000  // Set timeout to 10 minutes (600,000 ms)
         });
-        console.log('Page loaded, waiting for selector...');
 
-        // Wait for the necessary elements to load
-        await page.waitForSelector('.trade-content', {timeout: 600000});
+        // Wait for the necessary elements to load, with a longer timeout
+        await page.waitForSelector('.trade-content', {timeout: 600000});  // 10 minutes
 
-        console.log('Waiting for 30 seconds...');
-        await delay(30000);  // 30 seconds delay
+        // Add a 10-second delay before scraping the data
+        console.log('Waiting for 10 seconds...');
+        await delay(10000);  // 10 seconds delay
 
         // Scrape the user names, prices, stock, limits, payment methods, and trade count
         const p2pData = await page.evaluate(() => {
@@ -84,6 +81,7 @@ const scrapeP2P = async (page, retries = 5, delay = 60000) => {
             return data;
         });
 
+        // Log and save the scraped data
         console.log('P2P Trader Data:', p2pData);
         saveData(p2pData);
         console.log("Waiting 10 minutes before next scrape...");
@@ -92,10 +90,11 @@ const scrapeP2P = async (page, retries = 5, delay = 60000) => {
         console.error('Error during scraping:', error);
         logError(error);
 
+        // Retry if there are retries left
         if (retries > 0) {
-            console.log(`Retrying in ${ delay / 1000 } seconds... Attempts left: ${ retries }`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return scrapeP2P(page, retries - 1, delay * 2);
+            console.log(`Retrying... Attempts left: ${ retries }`);
+            await delay(60000);  // Wait before retrying
+            await scrapeP2P(page, retries - 1);
         } else {
             console.log('No more retries left.');
         }
@@ -104,6 +103,7 @@ const scrapeP2P = async (page, retries = 5, delay = 60000) => {
 
 // Function to run scraper every 10 minutes infinitely
 const startScraper = async () => {
+    // Launch Puppeteer browser once
     const browser = await puppeteer.launch({
         headless: false,
         args: [
@@ -113,21 +113,20 @@ const startScraper = async () => {
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process',
+            // '--single-process',
             '--disable-gpu'
         ]
     });
 
     const page = await browser.newPage();
 
-    // Set a random user-agent
-    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
-    await page.setUserAgent(userAgent);
+    // Set user-agent to mimic a real browser
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
     // Initial run
     await scrapeP2P(page);
 
-    // Schedule the scraper to run every 10 minutes
+    // Schedule the scraper to run every 10 minutes (600,000 milliseconds)
     setInterval(async () => {
         await scrapeP2P(page);
     }, 600000);  // 600,000 ms = 10 minutes
