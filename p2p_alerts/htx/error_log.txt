@@ -1,0 +1,4 @@
+2024-09-22T18:05:24.756Z - Error: Navigating frame was detached
+2024-09-22T18:06:24.776Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
+2024-09-22T18:07:24.781Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
+2024-09-22T18:08:24.789Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
