@@ -1,6 +1,5 @@
-2024-09-22T18:05:24.756Z - Error: Navigating frame was detached
-2024-09-22T18:06:24.776Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
-2024-09-22T18:07:24.781Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
-2024-09-22T18:08:24.789Z - Error: Attempted to use detached Frame '5A6F65D64A1ECB10F84A75A20F23B620'.
-2024-09-22T18:17:50.263Z - Error: Navigating frame was detached
-2024-09-22T18:18:05.419Z - Error: Navigating frame was detached
+2024-09-22T18:37:07.502Z - Error: Unknown value for options.waitUntil: domcontentloaded 
+2024-09-22T18:37:59.251Z - Error: Navigating frame was detached
+2024-09-22T18:40:28.344Z - Error: Navigating frame was detached
+2024-09-22T18:48:53.066Z - Error: Navigating frame was detached
+2024-09-22T18:49:53.086Z - Error: Attempted to use detached Frame '29611D077259687A40C122860B6449F6'.
