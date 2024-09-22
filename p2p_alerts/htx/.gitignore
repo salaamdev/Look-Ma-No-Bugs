@@ -1,5 +1,5 @@
 #folder, files related ignores
-error_log.txt
+./error_log.txt
 
 # Logs
 logs
