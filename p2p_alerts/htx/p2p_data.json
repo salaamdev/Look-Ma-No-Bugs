@@ -1,0 +1,38 @@
+{
+  "timestamp": "2024-09-22T19:04:07.931Z",
+  "data": [
+    {
+      "name": "salaamdev",
+      "price": "138.30 KES",
+      "stock": "184.265694 USDT",
+      "limit": "1.00-25,483.00 KES",
+      "paymentMethods": [
+        "M-PESA Kenya (Safaricom)"
+      ],
+      "tradeCount": "Trade(s) 24 | 100%"
+    },
+    {
+      "name": "Jiahdollah",
+      "price": "138.31 KES",
+      "stock": "128.942294 USDT",
+      "limit": "10.00-17,834.00 KES",
+      "paymentMethods": [
+        "Bank Transfer",
+        "M-PESA Kenya (Safaricom)",
+        "Airtel Money"
+      ],
+      "tradeCount": "Trade(s) 64 | 64%"
+    },
+    {
+      "name": "1st century",
+      "price": "164.80 KES",
+      "stock": "90.420582 USDT",
+      "limit": "1,000.00-14,901.00 KES",
+      "paymentMethods": [
+        "Bank Transfer",
+        "M-PESA Kenya (Safaricom)"
+      ],
+      "tradeCount": "Trade(s) 360 | 33%"
+    }
+  ]
+}
