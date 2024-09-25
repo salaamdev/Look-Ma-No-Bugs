@@ -1,12 +1,9 @@
 {
   "manifest_version": 3,
   "name": "AWS Restart Module & Sub-module Highlighter",
-  "description": "Highlight and remember selected modules and sub-modules on AWS Restart course page",
-  "version": "0.4",
+  "description": "Highlight, track and remember finished modules and sub-modules on AWS Restart course page",
+  "version": "1",
   "author": "Abdisalam Hassan",
-  "action": {
-    "default_popup": "popup.html"
-  },
   "content_scripts": [
     {
       "matches": ["https://awsrestart.instructure.com/courses/3301/modules"],
@@ -16,8 +13,6 @@
   ],
   "permissions": ["storage"],
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/icon16.png"
   }
 }
