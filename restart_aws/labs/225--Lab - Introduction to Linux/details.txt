@@ -1,0 +1,18 @@
+Credentials
+Cloud Access
+
+   AWS CLI:   Show
+Cloud Labs
+   Remaining session time: 00:59:55(60 minutes)
+   Session started at: 2024-09-24T01:12:37-0700
+   Session to end  at: 2024-09-24T02:19:55-0700
+
+   Accumulated lab time: 00:07:00 (7 minutes)
+
+   ips -- public:52.13.38.48, private:10.0.10.62
+
+   SSH key  ShowDownload PEMDownload PPK
+   AWS SSO  Download URL
+
+LabRegion	us-west-2
+PublicIP	52.13.38.48
