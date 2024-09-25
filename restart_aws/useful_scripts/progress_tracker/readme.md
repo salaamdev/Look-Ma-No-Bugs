@@ -20,7 +20,7 @@ This guide will walk you through the process of installing the AWS Restart Modul
 
 3. **Add the Script**
 
-   - The script can be found [here](). Copy the entire script.
+   - The script can be found [here](https://github.com/salaamdev/Look-Ma-No-Bugs/blob/main/restart_aws/useful_scripts/progress_tracker/script.js.txt). Copy the entire script.
    - Delete any existing code in Tampermonkey editor
    - Copy and paste the entire script in into the Tampermonkey editor
 
