@@ -4,7 +4,7 @@
 // @version      0.4
 // @description  Highlight and remember selected modules and sub-modules on AWS Restart course page
 // @author       Abdisalam Hassan
-// @match        https://awsrestart.instructure.com/courses/3301/modules
+// @match        https://awsrestart.instructure.com/courses/*/modules
 // @grant        none
 // ==/UserScript==
 
