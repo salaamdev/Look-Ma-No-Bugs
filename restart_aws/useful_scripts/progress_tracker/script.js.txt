@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AWS Restart Module & Sub-module Highlighter (Styled)
 // @namespace    https://awsrestart.instructure.com/
-// @version      0.4
+// @version      0.5
 // @description  Highlight and remember selected modules and sub-modules on AWS Restart course page
 // @author       Abdisalam Hassan
 // @match        https://awsrestart.instructure.com/courses/*/modules
@@ -11,35 +11,45 @@
 (function() {
     'use strict';
 
-    // Function to create the floating window
+    // Function to create the floating window for progress tracking
     function createFloatingWindow() {
+        console.log("Creating floating window for progress tracking");
         let container = document.createElement('div');
         container.id = 'highlighter-container';
         container.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #232f3e, #3b4a5a);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: transform 0.4s ease, opacity 0.4s ease;
             font-family: 'Arial', sans-serif;
-            max-width: 350px;
+            max-width: 400px;
             width: 100%;
+            opacity: 0;
+            transform: translateY(-20px);
         `;
         document.body.appendChild(container);
 
+        // Fade-in animation
+        requestAnimationFrame(() => {
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        });
+
+        // Create header for the floating window
         let header = document.createElement('div');
         header.style.cssText = `
-            padding: 15px 20px;
-            background-color: #232f3e;
+            padding: 20px;
+            background: #1f2a36;
             color: #ffffff;
             cursor: pointer;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -47,25 +57,33 @@
         header.innerHTML = 'AWS Restart Progress Tracker <span id="toggle-icon">▼</span>';
         container.appendChild(header);
 
+        // Create content area for the floating window
         let content = document.createElement('div');
         content.id = 'highlighter-content';
         content.style.cssText = `
-            padding: 15px;
+            padding: 20px;
             max-height: 500px;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: #888 #f1f1f1;
+            scrollbar-color: #888 #1f2a36;
+            background: #ffffff;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transform-origin: top;
+            transform: scaleY(1);
+            transition: transform 0.3s ease;
         `;
         container.appendChild(content);
 
-        // Toggle container visibility on header click
+        // Toggle visibility of the content area when header is clicked
         header.addEventListener('click', () => {
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
+            console.log("Toggling content visibility");
+            if (content.style.transform === 'scaleY(0)') {
+                content.style.transform = 'scaleY(1)';
                 container.style.height = 'auto';
                 document.getElementById('toggle-icon').textContent = '▼';
             } else {
-                content.style.display = 'none';
+                content.style.transform = 'scaleY(0)';
                 container.style.height = header.offsetHeight + 'px';
                 document.getElementById('toggle-icon').textContent = '▲';
             }
@@ -74,162 +92,204 @@
         return content;
     }
 
-    // Retrieve saved state from localStorage
+    // Retrieve saved highlight state from localStorage
     function getSavedState() {
-        let savedState = localStorage.getItem('highlightedElements');
-        return savedState ? JSON.parse(savedState) : {};
+        console.log("Retrieving saved state from localStorage");
+        try {
+            let savedState = localStorage.getItem('highlightedElements');
+            return savedState ? JSON.parse(savedState) : {};
+        } catch (error) {
+            console.error("Error retrieving saved state:", error);
+            return {};
+        }
     }
 
-    // Save state to localStorage
+    // Save highlight state to localStorage
     function saveState(state) {
-        localStorage.setItem('highlightedElements', JSON.stringify(state));
+        console.log("Saving state to localStorage", state);
+        try {
+            localStorage.setItem('highlightedElements', JSON.stringify(state));
+        } catch (error) {
+            console.error("Error saving state to localStorage:", error);
+        }
     }
 
-    // Get saved state
+    // Get saved highlight state
     let highlightedElements = getSavedState();
+    console.log("Initial highlighted elements", highlightedElements);
 
-    // Create the floating window container
+    // Create the floating window for progress tracking
     let container = createFloatingWindow();
 
-    // Find all elements with the class ".name.ellipsis"
+    // Find all elements with the class ".name.ellipsis" (modules/sub-modules)
     document.querySelectorAll(".name.ellipsis").forEach((element, index) => {
-        let parentElem = element.parentElement.parentElement;
+        try {
+            console.log(`Processing module element at index ${index}`, element);
+            let parentElem = element.closest('.context_module');
 
-        // Create a dropdown container
-        let dropdownContainer = document.createElement('div');
-        dropdownContainer.style.cssText = `
-            margin-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 10px;
-        `;
-        let dropdownLabel = document.createElement('div');
-        dropdownLabel.style.cssText = `
-            cursor: pointer;
-            font-weight: bold;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.3s ease;
-        `;
-        dropdownLabel.innerHTML = `<span style="margin-right: 10px;">▶</span>${element.textContent}`;
+            // Create a container for the dropdown (module section)
+            let dropdownContainer = document.createElement('div');
+            dropdownContainer.style.cssText = `
+                margin-bottom: 15px;
+                border-bottom: 1px solid #e0e0e0;
+                padding-bottom: 10px;
+                transition: all 0.3s ease;
+                transform: translateY(0);
+                opacity: 1;
+            `;
 
-        let dropdownContent = document.createElement('div');
-        dropdownContent.style.cssText = `
-            display: none;
-            padding-left: 20px;
-            margin-top: 10px;
-        `;
+            // Create the label for the dropdown (module title)
+            let dropdownLabel = document.createElement('div');
+            dropdownLabel.style.cssText = `
+                cursor: pointer;
+                font-weight: bold;
+                padding: 15px;
+                background: #f9f9f9;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                transition: background-color 0.3s ease, transform 0.3s ease;
+            `;
+            dropdownLabel.innerHTML = `<span style="margin-right: 10px;">▶</span>${element.textContent}`;
 
-        // Toggle dropdown on label click
-        dropdownLabel.addEventListener('click', () => {
-            dropdownContent.style.display = dropdownContent.style.display === 'none' ? 'block' : 'none';
-            dropdownLabel.querySelector('span').textContent = dropdownContent.style.display === 'none' ? '▶' : '▼';
-            dropdownLabel.style.backgroundColor = dropdownContent.style.display === 'none' ? '#f0f0f0' : '#e0e0e0';
-        });
+            // Create content area for sub-modules
+            let dropdownContent = document.createElement('div');
+            dropdownContent.style.cssText = `
+                display: none;
+                padding-left: 20px;
+                margin-top: 10px;
+                transition: all 0.3s ease;
+            `;
 
-        // Append label and content to dropdown container
-        dropdownContainer.appendChild(dropdownLabel);
-        dropdownContainer.appendChild(dropdownContent);
+            // Toggle visibility of sub-modules when dropdown label is clicked
+            dropdownLabel.addEventListener('click', () => {
+                console.log(`Toggling visibility for sub-modules of module at index ${index}`);
+                dropdownContent.style.display = dropdownContent.style.display === 'none' ? 'block' : 'none';
+                dropdownLabel.querySelector('span').textContent = dropdownContent.style.display === 'none' ? '▶' : '▼';
+                dropdownLabel.style.backgroundColor = dropdownContent.style.display === 'none' ? '#f9f9f9' : '#e8e8e8';
+                dropdownLabel.style.transform = dropdownContent.style.display === 'none' ? 'scale(1)' : 'scale(1.05)';
+            });
 
-        // Check if this element is in the saved state
-        if (highlightedElements[index]) {
-            parentElem.style.backgroundColor = 'rgba(255, 153, 0, 0.2)';
-        }
+            // Append dropdown label and content to dropdown container
+            dropdownContainer.appendChild(dropdownLabel);
+            dropdownContainer.appendChild(dropdownContent);
 
-        // Create the main checkbox for the parent element
-        let parentCheckbox = document.createElement('input');
-        parentCheckbox.type = 'checkbox';
-        parentCheckbox.checked = highlightedElements[index] || false;
-        parentCheckbox.style.marginRight = '10px';
-
-        parentCheckbox.addEventListener('change', () => {
-            if (parentCheckbox.checked) {
+            // Check if this element is highlighted (saved state)
+            if (highlightedElements[index]) {
+                console.log(`Highlighting module at index ${index}`);
                 parentElem.style.backgroundColor = 'rgba(255, 153, 0, 0.2)';
-                highlightedElements[index] = true;
-            } else {
-                parentElem.style.backgroundColor = '';
-                delete highlightedElements[index];
             }
 
-            // Save updated state
-            saveState(highlightedElements);
-        });
+            // Create the checkbox for the module
+            let parentCheckbox = document.createElement('input');
+            parentCheckbox.type = 'checkbox';
+            parentCheckbox.checked = highlightedElements[index] || false;
+            parentCheckbox.style.marginRight = '10px';
 
-        // Append the parent checkbox to the dropdown label
-        dropdownLabel.prepend(parentCheckbox);
-
-        // Extract child elements and create checkboxes for each child
-        let childIndex = 0;
-        element.parentElement.parentElement.parentElement.childNodes[5]?.childNodes[1]?.childNodes.forEach((childElement) => {
-            try {
-                let childText = childElement.childNodes[1].childNodes[3].innerText;
-                let childElemId = `${index}-${childIndex}`;
-
-                // Create child checkbox and label
-                let childContainer = document.createElement('div');
-                childContainer.style.cssText = `
-                    margin-bottom: 8px;
-                    display: flex;
-                    align-items: center;
-                `;
-                let childCheckbox = document.createElement('input');
-                childCheckbox.type = 'checkbox';
-                childCheckbox.checked = highlightedElements[childElemId] || false;
-                childCheckbox.style.marginRight = '8px';
-                let childLabel = document.createElement('label');
-                childLabel.textContent = childText;
-                childLabel.style.cssText = `
-                    font-size: 0.9em;
-                    color: #333;
-                `;
-
-                // Check if this child element is in the saved state
-                if (highlightedElements[childElemId]) {
-                    childElement.childNodes[1].childNodes[3].style.backgroundColor = 'rgba(0, 176, 255, 0.2)';
-                }
-
-                // Handle checkbox change event for child
-                childCheckbox.addEventListener('change', () => {
-                    if (childCheckbox.checked) {
-                        childElement.childNodes[1].childNodes[3].style.backgroundColor = 'rgba(0, 176, 255, 0.2)';
-                        highlightedElements[childElemId] = true;
+            // Handle checkbox change event for module
+            parentCheckbox.addEventListener('change', () => {
+                console.log(`Checkbox for module at index ${index} changed:`, parentCheckbox.checked);
+                try {
+                    if (parentCheckbox.checked) {
+                        parentElem.style.backgroundColor = 'rgba(255, 153, 0, 0.2)';
+                        highlightedElements[index] = true;
                     } else {
-                        childElement.childNodes[1].childNodes[3].style.backgroundColor = '';
-                        delete highlightedElements[childElemId];
+                        parentElem.style.backgroundColor = '';
+                        delete highlightedElements[index];
                     }
 
-                    // Save updated state
+                    // Save updated highlight state
                     saveState(highlightedElements);
-                });
+                } catch (error) {
+                    console.error("Error handling checkbox change for module:", error);
+                }
+            });
 
-                // Append checkbox and label to child container
-                childContainer.appendChild(childCheckbox);
-                childContainer.appendChild(childLabel);
+            // Add the checkbox to the dropdown label
+            dropdownLabel.prepend(parentCheckbox);
 
-                // Add child container to the dropdown content
-                dropdownContent.appendChild(childContainer);
+            // Extract and create checkboxes for sub-modules
+            let childIndex = 0;
+            let childElements = element.closest('.context_module').querySelectorAll('.ig-row');
+            childElements.forEach((childElement) => {
+                try {
+                    let childText = childElement.querySelector('.item_name').innerText;
+                    let childElemId = `${index}-${childIndex}`;
+                    console.log(`Processing sub-module at index ${childElemId}`, childElement);
 
-                // Increment child index
-                childIndex++;
-            } catch (error) {
-                console.error("Error processing child element:", error);
-            }
-        });
+                    // Create container for sub-module checkbox and label
+                    let childContainer = document.createElement('div');
+                    childContainer.style.cssText = `
+                        margin-bottom: 8px;
+                        display: flex;
+                        align-items: center;
+                        transition: transform 0.3s ease, opacity 0.3s ease;
+                    `;
+                    let childCheckbox = document.createElement('input');
+                    childCheckbox.type = 'checkbox';
+                    childCheckbox.checked = highlightedElements[childElemId] || false;
+                    childCheckbox.style.marginRight = '8px';
+                    let childLabel = document.createElement('label');
+                    childLabel.textContent = childText;
+                    childLabel.style.cssText = `
+                        font-size: 0.9em;
+                        color: #333;
+                    `;
 
-        // Add dropdown container to the main floating window
-        container.appendChild(dropdownContainer);
+                    // Check if sub-module is highlighted (saved state)
+                    if (highlightedElements[childElemId]) {
+                        console.log(`Highlighting sub-module at index ${childElemId}`);
+                        childElement.style.backgroundColor = 'rgba(0, 176, 255, 0.2)';
+                    }
+
+                    // Handle checkbox change event for sub-module
+                    childCheckbox.addEventListener('change', () => {
+                        console.log(`Checkbox for sub-module at index ${childElemId} changed:`, childCheckbox.checked);
+                        try {
+                            if (childCheckbox.checked) {
+                                childElement.style.backgroundColor = 'rgba(0, 176, 255, 0.2)';
+                                highlightedElements[childElemId] = true;
+                            } else {
+                                childElement.style.backgroundColor = '';
+                                delete highlightedElements[childElemId];
+                            }
+
+                            // Save updated highlight state
+                            saveState(highlightedElements);
+                        } catch (error) {
+                            console.error("Error handling checkbox change for sub-module:", error);
+                        }
+                    });
+
+                    // Append checkbox and label to sub-module container
+                    childContainer.appendChild(childCheckbox);
+                    childContainer.appendChild(childLabel);
+
+                    // Add sub-module container to dropdown content
+                    dropdownContent.appendChild(childContainer);
+
+                    // Increment child index
+                    childIndex++;
+                } catch (error) {
+                    console.error("Error processing child element:", error);
+                }
+            });
+
+            // Add dropdown container to the main floating window
+            container.appendChild(dropdownContainer);
+        } catch (error) {
+            console.error("Error processing module element:", error);
+        }
     });
 
-    // Add custom scrollbar styles
+    // Add custom scrollbar styles for the floating window
     let style = document.createElement('style');
     style.textContent = `
         #highlighter-content::-webkit-scrollbar {
             width: 8px;
         }
         #highlighter-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #1f2a36;
         }
         #highlighter-content::-webkit-scrollbar-thumb {
             background: #888;
